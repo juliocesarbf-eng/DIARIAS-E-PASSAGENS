@@ -1,0 +1,230 @@
+{
+  "id": "45aeb22e-325d-4c1d-9569-af0edcd6bb15",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.travel_requests": {
+      "name": "travel_requests",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "portaria": {
+          "name": "portaria",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sei": {
+          "name": "sei",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "formulario": {
+          "name": "formulario",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lotacao": {
+          "name": "lotacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "ferias": {
+          "name": "ferias",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Não'"
+        },
+        "evento": {
+          "name": "evento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tipo_evento": {
+          "name": "tipo_evento",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origem_destino_ida": {
+          "name": "origem_destino_ida",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_ida": {
+          "name": "data_ida",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destino_retorno_volta": {
+          "name": "destino_retorno_volta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "data_volta": {
+          "name": "data_volta",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "cota": {
+          "name": "cota",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "internacionais": {
+          "name": "internacionais",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Não'"
+        },
+        "qtde_diarias": {
+          "name": "qtde_diarias",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "valor_rs": {
+          "name": "valor_rs",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "observacao_justificativa": {
+          "name": "observacao_justificativa",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "observacao_apoio_logistico": {
+          "name": "observacao_apoio_logistico",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Pendente'"
+        },
+        "data_criacao": {
+          "name": "data_criacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.user_profiles": {
+      "name": "user_profiles",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "nome": {
+          "name": "nome",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "cargo": {
+          "name": "cargo",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "lotacao": {
+          "name": "lotacao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "ferias_padrao": {
+          "name": "ferias_padrao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Não'"
+        },
+        "sei_padrao": {
+          "name": "sei_padrao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "cota_padrao": {
+          "name": "cota_padrao",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {},
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

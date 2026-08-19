@@ -1,0 +1,44 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sRGB, sans-serif;
+  --color-primary: #041627;
+  --color-primary-container: #1a2b3c;
+  --color-surface-bg: #f7f9ff;
+  --color-text-dark: #121d26;
+  --color-brand-blue: #005fb8;
+  --color-secondary: #595f64;
+  --color-outline-gray: #c4c6cd;
+  --color-card-border: #e0e5eb;
+  --color-success-bg: #e6f4ea;
+  --color-success-text: #137333;
+  --color-pending-bg: #fef7e0;
+  --color-pending-text: #b06000;
+  --color-draft-bg: #f1f3f4;
+  --color-draft-text: #3c4043;
+  --color-error-bg: #fce8e6;
+  --color-error-text: #c5221f;
+}
+
+body {
+  background-color: var(--color-surface-bg);
+  color: var(--color-text-dark);
+  font-family: var(--font-sans);
+}
+
+/* custom scrollbar-friendly styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(26, 43, 60, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(26, 43, 60, 0.4);
+}
