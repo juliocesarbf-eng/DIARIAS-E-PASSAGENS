@@ -1,15 +1,23 @@
+import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pkg from 'pg';
 import * as schema from './schema.ts';
 
 const { Pool } = pkg;
 
+// Helper to determine active database connection string for Supabase or standard PostgreSQL
+export const getConnectionString = (): string | null => {
+  const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL || process.env.SUPABASE_DB_URL;
+  if (url && url.trim() !== "" && !url.includes("postgres.xxxxx") && !url.includes("YOUR_")) {
+    return url.trim();
+  }
+  return null;
+};
+
 // Create connection pool from DATABASE_URL (Supabase) or standard SQL_* parameters
 export const isDbAvailable = !!(
-  process.env.DATABASE_URL &&
-  process.env.DATABASE_URL.trim() !== "" &&
-  !process.env.DATABASE_URL.includes("postgres.xxxxx") &&
-  !process.env.DATABASE_URL.includes("YOUR_")
+  getConnectionString() ||
+  (process.env.SQL_HOST && process.env.SQL_PASSWORD)
 );
 
 let dbHealthy = true;
@@ -23,13 +31,13 @@ export const setDbUnhealthy = () => {
 };
 
 export const createPool = () => {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = getConnectionString();
   
   if (connectionString) {
-    console.log('Database: Using connection string (from DATABASE_URL)');
+    console.log('Database: Initializing Drizzle connection pool with Supabase/PostgreSQL URL');
     return new Pool({
       connectionString,
-      ssl: { rejectUnauthorized: false }, // Crucial for cloud databases like Supabase
+      ssl: { rejectUnauthorized: false }, // Essential for Supabase cloud PostgreSQL
       connectionTimeoutMillis: 15000,
     });
   }
@@ -53,3 +61,4 @@ pool.on('error', (err) => {
 });
 
 export const db = drizzle(pool, { schema });
+

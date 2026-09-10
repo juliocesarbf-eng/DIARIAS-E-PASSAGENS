@@ -4,7 +4,7 @@ import * as dotenv from "dotenv";
 dotenv.config();
 
 // Supabase or standard PostgreSQL Connection URL
-const databaseUrl = process.env.DATABASE_URL;
+const databaseUrl = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL || process.env.SUPABASE_DB_URL;
 
 // Fallbacks for specific environment parameters
 const sqlHost = process.env.SQL_HOST;
