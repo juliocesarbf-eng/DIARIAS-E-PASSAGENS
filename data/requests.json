@@ -1,0 +1,26 @@
+[
+  {
+    "id": "TR-2026-001",
+    "portaria": "4579555",
+    "sei": "45156656",
+    "formulario": "",
+    "nome": "JULIO CESAR BRASIL FERREIRA",
+    "cargo": "MILITAR",
+    "lotacao": "1a AUD 1a CJM",
+    "ferias": "Não",
+    "evento": "Realizar Visita ao Centro de Análises de Sistemas Navais (CASNAV)",
+    "tipoEvento": "Outros",
+    "origemDestinoIda": "Brasília/DF",
+    "dataIda": "2026-09-08",
+    "destinoRetornoVolta": "São Paulo/SP",
+    "dataVolta": "2026-09-10",
+    "cota": "1AUD3 (Ofic. de Just.)",
+    "internacionais": "Não",
+    "qtdeDiarias": 2.5,
+    "valorRs": 2025.675,
+    "observacaoJustificativa": "EM INSTRUCAO",
+    "observacaoApoioLogistico": "",
+    "status": "Pendente",
+    "dataCriacao": "2026-09-10"
+  }
+]

@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { db, isDbAvailable, isDbHealthy, setDbUnhealthy, pool } from "./src/db/index.ts";
-import { travelRequests, userProfiles } from "./src/db/schema.ts";
+import { diariasEPassagens, travelRequests, userProfiles } from "./src/db/schema.ts";
 import { eq, desc } from "drizzle-orm";
 
 // Ensure fallback JSON persistence directory and default files exist
@@ -68,31 +68,96 @@ async function startServer() {
       console.log("Database: Connection probe succeeded. PostgreSQL database is fully online!");
       
       // Auto-initialize required tables in the cloud database (Supabase) if they do not exist definitions
-      console.log("Database: Securing table presence for travel_requests and user_profiles...");
+      console.log("Database: Securing table presence for 'DIARIAS E PASSAGENS' and user_profiles...");
+      
+      // 1. Create table "DIARIAS E PASSAGENS" if it does not exist
       await pool.query(`
-        CREATE TABLE IF NOT EXISTS travel_requests (
+        CREATE TABLE IF NOT EXISTS "DIARIAS E PASSAGENS" (
           id TEXT PRIMARY KEY,
-          portaria TEXT NOT NULL,
-          sei TEXT NOT NULL,
-          formulario TEXT NOT NULL,
-          nome TEXT NOT NULL,
-          cargo TEXT NOT NULL,
-          lotacao TEXT NOT NULL,
+          portaria TEXT NOT NULL DEFAULT '',
+          sei TEXT NOT NULL DEFAULT '',
+          formulario TEXT NOT NULL DEFAULT '',
+          nome TEXT NOT NULL DEFAULT '',
+          cargo TEXT NOT NULL DEFAULT '',
+          lotacao TEXT NOT NULL DEFAULT '',
           ferias TEXT NOT NULL DEFAULT 'Não',
-          evento TEXT NOT NULL,
-          tipo_evento TEXT NOT NULL,
-          origem_destino_ida TEXT NOT NULL,
-          data_ida TEXT NOT NULL,
-          destino_retorno_volta TEXT NOT NULL,
-          data_volta TEXT NOT NULL,
-          cota TEXT NOT NULL,
+          evento TEXT NOT NULL DEFAULT '',
+          tipo_evento TEXT NOT NULL DEFAULT 'Outros',
+          origem_destino_ida TEXT NOT NULL DEFAULT '',
+          data_ida TEXT NOT NULL DEFAULT '',
+          destino_retorno_volta TEXT NOT NULL DEFAULT '',
+          data_volta TEXT NOT NULL DEFAULT '',
+          cota TEXT NOT NULL DEFAULT '',
           internacionais TEXT NOT NULL DEFAULT 'Não',
           qtde_diarias DOUBLE PRECISION NOT NULL DEFAULT 0,
           valor_rs DOUBLE PRECISION NOT NULL DEFAULT 0,
-          observacao_justificativa TEXT NOT NULL,
-          observacao_apoio_logistico TEXT NOT NULL,
+          observacao_justificativa TEXT NOT NULL DEFAULT '',
+          observacao_apoio_logistico TEXT NOT NULL DEFAULT '',
           status TEXT NOT NULL DEFAULT 'Pendente',
-          data_criacao TEXT NOT NULL
+          data_criacao TEXT NOT NULL DEFAULT '',
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `);
+
+      // 2. Add any missing columns to "DIARIAS E PASSAGENS" if the user created it with only 2 columns
+      await pool.query(`
+        DO $$
+        BEGIN
+          BEGIN
+            ALTER TABLE "DIARIAS E PASSAGENS" ALTER COLUMN id TYPE TEXT;
+          EXCEPTION WHEN OTHERS THEN NULL;
+          END;
+        END $$;
+
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS portaria TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS sei TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS formulario TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS nome TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS cargo TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS lotacao TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS ferias TEXT NOT NULL DEFAULT 'Não';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS evento TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS tipo_evento TEXT NOT NULL DEFAULT 'Outros';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS origem_destino_ida TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS data_ida TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS destino_retorno_volta TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS data_volta TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS cota TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS internacionais TEXT NOT NULL DEFAULT 'Não';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS qtde_diarias DOUBLE PRECISION NOT NULL DEFAULT 0;
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS valor_rs DOUBLE PRECISION NOT NULL DEFAULT 0;
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS observacao_justificativa TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS observacao_apoio_logistico TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'Pendente';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS data_criacao TEXT NOT NULL DEFAULT '';
+        ALTER TABLE "DIARIAS E PASSAGENS" ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+      `);
+
+      // 3. Keep travel_requests compatibility table
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS travel_requests (
+          id TEXT PRIMARY KEY,
+          portaria TEXT NOT NULL DEFAULT '',
+          sei TEXT NOT NULL DEFAULT '',
+          formulario TEXT NOT NULL DEFAULT '',
+          nome TEXT NOT NULL DEFAULT '',
+          cargo TEXT NOT NULL DEFAULT '',
+          lotacao TEXT NOT NULL DEFAULT '',
+          ferias TEXT NOT NULL DEFAULT 'Não',
+          evento TEXT NOT NULL DEFAULT '',
+          tipo_evento TEXT NOT NULL DEFAULT 'Outros',
+          origem_destino_ida TEXT NOT NULL DEFAULT '',
+          data_ida TEXT NOT NULL DEFAULT '',
+          destino_retorno_volta TEXT NOT NULL DEFAULT '',
+          data_volta TEXT NOT NULL DEFAULT '',
+          cota TEXT NOT NULL DEFAULT '',
+          internacionais TEXT NOT NULL DEFAULT 'Não',
+          qtde_diarias DOUBLE PRECISION NOT NULL DEFAULT 0,
+          valor_rs DOUBLE PRECISION NOT NULL DEFAULT 0,
+          observacao_justificativa TEXT NOT NULL DEFAULT '',
+          observacao_apoio_logistico TEXT NOT NULL DEFAULT '',
+          status TEXT NOT NULL DEFAULT 'Pendente',
+          data_criacao TEXT NOT NULL DEFAULT ''
         );
       `);
       
@@ -107,7 +172,7 @@ async function startServer() {
           cota_padrao TEXT NOT NULL DEFAULT ''
         );
       `);
-      console.log("Database: Table presence secured successfully!");
+      console.log("Database: All table columns and presence secured successfully in Supabase!");
     } catch (err: any) {
       console.log(`Database Status: Offline (${err.message || err}). Enabling automatic local JSON fallback mode.`);
       setDbUnhealthy();
@@ -189,13 +254,18 @@ async function startServer() {
       return res.json(readFallbackRequests());
     }
     try {
-      console.log("API: Fetching travel requests from PostgreSQL...");
-      const result = await db.select().from(travelRequests).orderBy(desc(travelRequests.dataCriacao));
+      console.log("API: Fetching travel requests from PostgreSQL ('DIARIAS E PASSAGENS')...");
+      const result = await db.select().from(diariasEPassagens).orderBy(desc(diariasEPassagens.dataCriacao));
       res.json(result);
     } catch (error: any) {
-      console.log("API Note - Failed to fetch requests from PostgreSQL, marking db unhealthy:", error.message || error);
-      setDbUnhealthy();
-      res.json(readFallbackRequests());
+      console.log("API Note - Failed to fetch from DIARIAS E PASSAGENS, trying travel_requests:", error.message || error);
+      try {
+        const result = await db.select().from(travelRequests).orderBy(desc(travelRequests.dataCriacao));
+        return res.json(result);
+      } catch (e2) {
+        setDbUnhealthy();
+        res.json(readFallbackRequests());
+      }
     }
   });
 
@@ -240,21 +310,33 @@ async function startServer() {
     }
 
     try {
-      console.log(`API: Saving travel request with ID ${data.id} to PostgreSQL...`);
+      console.log(`API: Saving travel request with ID ${data.id} to PostgreSQL ('DIARIAS E PASSAGENS')...`);
       const result = await db
-        .insert(travelRequests)
+        .insert(diariasEPassagens)
         .values(payload)
         .onConflictDoUpdate({
-          target: travelRequests.id,
+          target: diariasEPassagens.id,
           set: payload,
         })
         .returning();
 
       res.status(201).json(result[0]);
     } catch (error: any) {
-      console.log("API Note - Failed to save request to PostgreSQL, marking db unhealthy:", error.message || error);
-      setDbUnhealthy();
-      res.status(201).json(payload);
+      console.log("API Note - Failed to save to DIARIAS E PASSAGENS, attempting fallback to travel_requests:", error.message || error);
+      try {
+        const result = await db
+          .insert(travelRequests)
+          .values(payload)
+          .onConflictDoUpdate({
+            target: travelRequests.id,
+            set: payload,
+          })
+          .returning();
+        return res.status(201).json(result[0]);
+      } catch (e2) {
+        setDbUnhealthy();
+        res.status(201).json(payload);
+      }
     }
   });
 
@@ -279,10 +361,10 @@ async function startServer() {
     }
 
     try {
-      console.log(`API: Deleting travel request ${id} from PostgreSQL...`);
+      console.log(`API: Deleting travel request ${id} from PostgreSQL ('DIARIAS E PASSAGENS')...`);
       const result = await db
-        .delete(travelRequests)
-        .where(eq(travelRequests.id, id))
+        .delete(diariasEPassagens)
+        .where(eq(diariasEPassagens.id, id))
         .returning();
 
       if (result.length === 0 && !fallbackResult) {

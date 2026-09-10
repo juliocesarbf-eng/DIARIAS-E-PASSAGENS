@@ -8,8 +8,15 @@ const { Pool } = pkg;
 // Helper to determine active database connection string for Supabase or standard PostgreSQL
 export const getConnectionString = (): string | null => {
   const url = process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.SUPABASE_DATABASE_URL || process.env.SUPABASE_DB_URL;
-  if (url && url.trim() !== "" && !url.includes("postgres.xxxxx") && !url.includes("YOUR_")) {
-    return url.trim();
+  if (url && url.trim() !== "") {
+    const trimmed = url.trim();
+    if (
+      (trimmed.startsWith("postgres://") || trimmed.startsWith("postgresql://")) &&
+      !trimmed.includes("postgres.xxxxx") &&
+      !trimmed.includes("YOUR_")
+    ) {
+      return trimmed;
+    }
   }
   return null;
 };
